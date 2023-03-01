@@ -32,3 +32,4 @@ Route::post("/game/add",[GameController::class,'add']);
 Route::post("/game/edit/{id}",[GameController::class,'store']);
 Route::post("/game/delete/{id}",[GameController::class,'delete']);
 Route::post("/game/import",[GameController::class,'import']);
+Route::get("/game/export",[GameController::class,'export']);

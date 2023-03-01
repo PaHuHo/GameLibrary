@@ -166,13 +166,13 @@
 
 <script>
 import axios from 'axios'
-import { INITIAL_CATEGORY, getCategory } from './store'
-
+import { INITIAL_CATEGORY, getCategory } from '../../store'
+import { API_URL } from '@/api';
 import { useToast } from "vue-toastification";
 const toast = useToast();
 export default {
-    mounted() {
-        this.listCategory = INITIAL_CATEGORY
+    async mounted() {
+        this.listCategory = await INITIAL_CATEGORY
     },
     data() {
         return {
@@ -201,7 +201,7 @@ export default {
 
         async editCategory() {
             try {
-                await axios.post("http://127.0.0.1:8000/api/category/edit/" + this.categoryEdit.id, {
+                await axios.post(`${API_URL}/api/category/edit/` + this.categoryEdit.id, {
                     name: this.categoryEdit.name
                 }).then(res => {
                     toast.success(res.data.message.toString());
@@ -217,7 +217,7 @@ export default {
 
         async addCategory() {
             try {
-                await axios.post("http://127.0.0.1:8000/api/category/add", {
+                await axios.post(`${API_URL}/api/category/add`, {
                     name: this.nameCategoryAdd
                 }).then(res => {
                     toast.success(res.data.message.toString());

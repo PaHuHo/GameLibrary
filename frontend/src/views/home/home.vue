@@ -1,7 +1,7 @@
 <template>
     <!-- Preloader -->
     <!-- <div class="preloader flex-column justify-content-center align-items-center">
-            <img class="animation__shake" src="http://127.0.0.1:8000/assets/dist/img/AdminLTELogo.png" alt="AdminLTELogo"
+            <img class="animation__shake" src="${API_URL}/assets/dist/img/AdminLTELogo.png" alt="AdminLTELogo"
                 height="60" width="60">
         </div> -->
     <!-- Content Wrapper. Contains page content -->
@@ -73,8 +73,7 @@
                                 <input type="search" class="form-control form-control-lg"
                                     placeholder="Type your keywords here" v-model="searchForm.name">
                                 <div class="input-group-append">
-                                    <button type="submit" class="btn btn-lg btn-default"
-                                        @click="getSearchGame(1, true)">
+                                    <button type="submit" class="btn btn-lg btn-default" @click="getSearchGame(1, true)">
                                         <i class="fa fa-search"></i>
                                     </button>
                                 </div>
@@ -101,16 +100,16 @@
                                 @paginate="getSearchGame(page)" />
                         </div>
                         <div class="row">
-                            <div v-for="gameData in listGame.data" class="col-md-12 col-lg-6 col-xl-4">
-                                <div class="card mb-2 bg-gradient-dark">
+                            <div  v-for="gameData in listGame.data" class="col-md-12 col-lg-6 col-xl-4">
+                                <div  class="card mb-2 bg-gradient-dark">
                                     <img class="card-img-top" :src="gameData.image" height="300" width="200">
-                                    <div class="card-img-overlay d-flex flex-column justify-content-end">
+                                    <div id="game_data" class="card-img-overlay d-flex flex-column justify-content-end">
                                         <!-- <h3 class="card-title text-white">{{ gameData.name }}</h3> -->
-                                        <div class="card-text text-white pb-2 pt-1"><star-rating
+                                        <div id="star_game" class="card-text text-white pb-2 pt-1"><star-rating
                                                 :rating="Number(gameData.rating)" :increment="0.5" :star-size="30"
                                                 :read-only="true"></star-rating>
                                         </div>
-                                        <div>
+                                        <div id="tag_game">
                                             <ul style="padding:0">
                                                 <li v-for="categoryGame in gameData.categories" class="btn"
                                                     :style="['border-radius: 30px;margin: 5px;color:white; ', (categoryGame.color ? 'background-color:#' + categoryGame.color : '')].join(' ')">
@@ -150,6 +149,7 @@ import StarRating from 'vue-star-rating'
 import { INITIAL_CATEGORY, INITIAL_GAME, getGame } from '../../store'
 import { useToast } from "vue-toastification";
 import Vue3TagsInput from 'vue3-tags-input';
+import { API_URL } from '@/api';
 
 const toast = useToast();
 export default {
@@ -157,10 +157,9 @@ export default {
         StarRating,
         Vue3TagsInput,
     },
-    mounted() {
-        this.listGame = INITIAL_GAME
-        console.log(this.listGame)
-        this.tagsCategory = INITIAL_CATEGORY
+    async mounted() {
+        this.tagsCategory = await INITIAL_CATEGORY
+        this.listGame = await INITIAL_GAME
     },
     data() {
         return {
@@ -214,7 +213,7 @@ export default {
         async getSearchGame(page = 1, wantBack = false) {
             try {
 
-                const response = await axios.get('http://127.0.0.1:8000/api/game/search?page=' + page + '&name=' + this.searchForm.name + '&category=' + this.searchForm.category + '&status=' + this.searchForm.status + '&orderBy=' + this.searchForm.orderBy + '&sortOrder=' + this.searchForm.sortOrder)
+                const response = await axios.get(`${API_URL}/api/game/search?page=` + page + '&name=' + this.searchForm.name + '&category=' + this.searchForm.category + '&status=' + this.searchForm.status + '&orderBy=' + this.searchForm.orderBy + '&sortOrder=' + this.searchForm.sortOrder)
                 console.log(response)
                 this.listGame = response.data
                 if (wantBack) {
@@ -227,3 +226,30 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+#star_game {
+    display: none;
+}
+
+#tag_game {
+    display: none;
+}
+
+#game_data:hover {
+    cursor: pointer;
+}
+
+#game_data:hover #star_game ,#game_data:hover #tag_game {
+    display: block;
+}
+
+@keyframes background-fade {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: #f5f5f5;
+  }
+}
+</style>

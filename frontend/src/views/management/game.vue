@@ -1,7 +1,7 @@
 <template>
     <!-- Preloader -->
     <!-- <div class="preloader flex-column justify-content-center align-items-center">
-            <img class="animation__shake" src="http://127.0.0.1:8000/assets/dist/img/AdminLTELogo.png" alt="AdminLTELogo"
+            <img class="animation__shake" src="${API_URL}/assets/dist/img/AdminLTELogo.png" alt="AdminLTELogo"
                 height="60" width="60">
         </div> -->
 
@@ -100,6 +100,7 @@
                                 <button class="btn btn-primary" @click="openModel('#createForm')">ADD</button>
 
                                 <button class="btn btn-success" @click="openModel('#importForm')">IMPORT</button>
+                                <button class="btn btn-primary" @click="exportExcel()" style="margin-right:10px">Export</button>
                             </div>
                             <!-- /.card-header -->
                             <div class="card-body">
@@ -345,7 +346,7 @@
         </div>
     </div>
 
-    <!-- export form game -->
+    <!-- import form game -->
     <div class="modal fade " id="importForm" tabindex="-1" role="dialog" data-backdrop="false"
         aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
@@ -361,7 +362,7 @@
                 <div class="modal-body" style="padding-top:5px">
                     <div class="panel panel-primary" style="border: none;margin-bottom: 0;">
                         <div class="panel-heading">
-                            <h3 class="panel-title">Export file excel</h3>
+                            <h3 class="panel-title">Import file excel</h3>
                         </div>
                         <div class="panel-body">
                             <form id="importExcelForm">
@@ -394,6 +395,7 @@ import StarRating from 'vue-star-rating'
 import { INITIAL_CATEGORY, INITIAL_GAME, getGame } from '../../store'
 import { useToast } from "vue-toastification";
 import Vue3TagsInput from 'vue3-tags-input';
+import { API_URL } from '@/api';
 
 const toast = useToast();
 export default {
@@ -401,9 +403,9 @@ export default {
         StarRating,
         Vue3TagsInput
     },
-    mounted() {
-        this.listGame = INITIAL_GAME
-        this.tagsCategory = INITIAL_CATEGORY
+    async mounted() {
+        this.listGame =await INITIAL_GAME
+        this.tagsCategory = await INITIAL_CATEGORY
     },
     data() {
         return {
@@ -508,7 +510,7 @@ export default {
         async getSearchGame(page = 1, wantBack = false) {
             try {
 
-                const response = await axios.get('http://127.0.0.1:8000/api/game/search?page=' + page + '&name=' + this.searchForm.name + '&category=' + this.searchForm.category + '&status=' + this.searchForm.status + '&orderBy=' + this.searchForm.orderBy + '&sortOrder=' + this.searchForm.sortOrder)
+                const response = await axios.get(`${API_URL}/api/game/search?page=` + page + '&name=' + this.searchForm.name + '&category=' + this.searchForm.category + '&status=' + this.searchForm.status + '&orderBy=' + this.searchForm.orderBy + '&sortOrder=' + this.searchForm.sortOrder)
                 console.log(response)
                 this.listGame = response.data
                 if (wantBack) {
@@ -521,7 +523,7 @@ export default {
 
         async addGame() {
             try {
-                await axios.post("http://127.0.0.1:8000/api/game/add", {
+                await axios.post(`${API_URL}/api/game/add`, {
                     name: this.formAddGame.name,
                     categories: this.formAddGame.categories,
                     rating: this.formAddGame.rating,
@@ -541,7 +543,7 @@ export default {
         },
         async editGame() {
             try {
-                await axios.post("http://127.0.0.1:8000/api/game/edit/" + this.formEditGame.id, {
+                await axios.post(`${API_URL}/api/game/edit/` + this.formEditGame.id, {
                     name: this.formEditGame.name,
                     categories: this.formEditGame.categories,
                     rating: this.formEditGame.rating,
@@ -565,7 +567,7 @@ export default {
             try {
                 var $importExcelForm = $('#importExcelForm')
                 var data = new FormData(importExcelForm)
-                await axios.post("http://127.0.0.1:8000/api/game/import", data).then(res => {
+                await axios.post(`${API_URL}/api/game/import`, data).then(res => {
                     toast.success(res.data.message.toString());
                 })
                 await this.getSearchGame(this.page)
@@ -577,6 +579,24 @@ export default {
                 // });
             }
         },
+        async exportExcel() {
+            try {
+                // const response = await axios.get('/api/products/export?page=' + page + '&name=' + this.searchProduct.name + '&price=' + this.searchProduct.price)
+                var query = {
+                    name: this.searchForm.name,
+                    category: this.searchForm.category,
+                    status: this.searchForm.status,
+                    orderBy: this.searchForm.orderBy,
+                    sortOrder: this.searchForm.sortOrder,
+                }
+                var url = `${API_URL}/api/game/export?` + $.param(query);
+                console.log(url)
+                window.location = url;
+                // const response = await axios.get('/api/products/export?page=' + page + '&name=' + this.searchProduct.name + '&price=' + this.searchProduct.price)
+            } catch (error) {
+                this.error = error.response.data
+            }
+        }
     },
     computed: {
     }
